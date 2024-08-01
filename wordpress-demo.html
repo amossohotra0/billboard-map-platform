@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordPress Plugin Demo - Billboard Map</title>
+    <link rel="stylesheet" href="wordpress-plugin/assets/css/billboard-map.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f1;
+        }
+        .wp-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .wp-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .shortcode-demo {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            border-left: 4px solid #0073aa;
+        }
+    </style>
+</head>
+<body>
+    <div class="wp-container">
+        <div class="wp-header">
+            <h1>🔌 WordPress Plugin Demo</h1>
+            <p>This demonstrates how the Billboard Map would appear in WordPress</p>
+            <div class="shortcode-demo">
+                <strong>Shortcode used:</strong> [billboard_map height="500px" show_filters="true"]
+            </div>
+        </div>
+
+        <!-- This simulates the WordPress shortcode output -->
+        <div id="billboard-map-container" 
+             data-height="500px"
+             data-zoom="4"
+             data-center-lat="39.8283"
+             data-center-lng="-98.5795"
+             data-show-filters="true"
+             data-show-search="true">
+            
+            <div id="billboard-filters" class="billboard-filters">
+                <div class="filter-group">
+                    <label for="type-filter">Type:</label>
+                    <select id="type-filter" name="type">
+                        <option value="">All Types</option>
+                        <option value="static">Static</option>
+                        <option value="digital">Digital</option>
+                        <option value="poster">Poster</option>
+                        <option value="wallscape">Wallscape</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="availability-filter">Availability:</label>
+                    <select id="availability-filter" name="availability">
+                        <option value="">All</option>
+                        <option value="available">Available</option>
+                        <option value="coming_soon">Coming Soon</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="city-filter">City:</label>
+                    <input type="text" id="city-filter" name="city" placeholder="Enter city name">
+                </div>
+                
+                <div class="filter-group">
+                    <button id="apply-filters" class="btn btn-primary">Apply Filters</button>
+                    <button id="clear-filters" class="btn btn-secondary">Clear</button>
+                </div>
+            </div>
+            
+            <div id="billboard-map" style="height: 500px; width: 100%; background: #f0f8ff; display: flex; align-items: center; justify-content: center; border: 2px dashed #0073aa; border-radius: 8px;">
+                <div style="text-align: center; color: #0073aa;">
+                    <h3>🗺️ Interactive Google Map</h3>
+                    <p>Billboard pins would appear here with your Google Maps API key</p>
+                    <p style="font-size: 14px; margin-top: 10px;">Features: Custom markers, clustering, info windows, mobile responsive</p>
+                </div>
+            </div>
+            
+            <div id="billboard-loading" class="billboard-loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading billboards...</p>
+            </div>
+        </div>
+        
+        <!-- Billboard Details Modal -->
+        <div id="billboard-modal" class="billboard-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-title">Billboard Details</h2>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-content">
+                        <p>Detailed billboard information would appear here...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="contact-billboard" class="btn btn-primary">Contact About This Billboard</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 4px;">
+            <h3>WordPress Plugin Features:</h3>
+            <ul style="margin: 15px 0; padding-left: 20px;">
+                <li>✅ Easy shortcode integration: <code>[billboard_map]</code></li>
+                <li>✅ Customizable parameters (height, zoom, center, filters)</li>
+                <li>✅ Admin settings panel for API configuration</li>
+                <li>✅ AJAX-powered filtering without page reloads</li>
+                <li>✅ Mobile responsive design</li>
+                <li>✅ Modal popups for detailed billboard information</li>
+                <li>✅ Compatible with any WordPress theme</li>
+                <li>✅ Translation ready (i18n support)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Simulate WordPress plugin functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mock data for demo
+            const mockBillboards = [
+                {
+                    id: 1,
+                    name: "Downtown Digital Display",
+                    city: "New York",
+                    state: "NY",
+                    type: "digital",
+                    availability: "available",
+                    monthlyRate: 8500
+                },
+                {
+                    id: 2,
+                    name: "Highway 101 Static",
+                    city: "San Francisco", 
+                    state: "CA",
+                    type: "static",
+                    availability: "available",
+                    monthlyRate: 6500
+                }
+            ];
+
+            // Filter functionality
+            document.getElementById('apply-filters').addEventListener('click', function() {
+                const type = document.getElementById('type-filter').value;
+                const availability = document.getElementById('availability-filter').value;
+                const city = document.getElementById('city-filter').value;
+                
+                console.log('Applying filters:', { type, availability, city });
+                alert('Filters applied! In the real plugin, this would update the map markers.');
+            });
+
+            document.getElementById('clear-filters').addEventListener('click', function() {
+                document.getElementById('type-filter').value = '';
+                document.getElementById('availability-filter').value = '';
+                document.getElementById('city-filter').value = '';
+                alert('Filters cleared! Map would show all billboards.');
+            });
+
+            // Modal functionality
+            document.querySelector('.close').addEventListener('click', function() {
+                document.getElementById('billboard-modal').style.display = 'none';
+            });
+
+            // Simulate clicking on map marker
+            document.getElementById('billboard-map').addEventListener('click', function() {
+                document.getElementById('modal-title').textContent = 'Downtown Digital Display';
+                document.getElementById('modal-content').innerHTML = `
+                    <div class="billboard-details">
+                        <div class="billboard-detail"><strong>Address:</strong> 123 Broadway</div>
+                        <div class="billboard-detail"><strong>City:</strong> New York, NY</div>
+                        <div class="billboard-detail"><strong>Type:</strong> Digital</div>
+                        <div class="billboard-detail"><strong>Size:</strong> 14x48</div>
+                        <div class="billboard-detail"><strong>Monthly Rate:</strong> $8,500</div>
+                        <div class="billboard-detail"><strong>Availability:</strong> <span class="availability-available">AVAILABLE</span></div>
+                    </div>
+                `;
+                document.getElementById('billboard-modal').style.display = 'flex';
+            });
+        });
+    </script>
+</body>
+</html>

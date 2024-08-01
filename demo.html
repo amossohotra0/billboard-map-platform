@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billboard Map Platform - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-group label {
+            font-weight: 500;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .filter-group select, .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #map {
+            width: 100%;
+            height: 600px;
+        }
+        
+        .billboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .billboard-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .billboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .billboard-card h3 {
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .billboard-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .billboard-detail .label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+        
+        .billboard-detail .value {
+            color: #1e293b;
+        }
+        
+        .availability-available { color: #059669; font-weight: 600; }
+        .availability-coming_soon { color: #d97706; font-weight: 600; }
+        .availability-sold { color: #dc2626; font-weight: 600; }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗺️ Billboard Map Platform</h1>
+        <p>Interactive billboard inventory browser - Demo Version</p>
+    </div>
+    
+    <div class="container">
+        <div id="stats" class="stats"></div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="type-filter">Type:</label>
+                <select id="type-filter">
+                    <option value="">All Types</option>
+                    <option value="static">Static</option>
+                    <option value="digital">Digital</option>
+                    <option value="poster">Poster</option>
+                    <option value="wallscape">Wallscape</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="availability-filter">Availability:</label>
+                <select id="availability-filter">
+                    <option value="">All</option>
+                    <option value="available">Available</option>
+                    <option value="coming_soon">Coming Soon</option>
+                    <option value="sold">Sold</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="city-filter">City:</label>
+                <input type="text" id="city-filter" placeholder="Enter city name">
+            </div>
+            
+            <div class="filter-group">
+                <button id="apply-filters" class="btn btn-primary">Apply Filters</button>
+                <button id="clear-filters" class="btn btn-secondary">Clear</button>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map">
+                <div class="loading">
+                    <h3>📍 Map View</h3>
+                    <p>Google Maps integration would appear here with your API key</p>
+                    <p style="margin-top: 10px; font-size: 14px; color: #6b7280;">
+                        To enable the interactive map, add your Google Maps API key to the .env file
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="billboards" class="billboard-grid"></div>
+        <div id="loading" class="loading" style="display: none;">Loading billboards...</div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        let billboards = [];
+        let filteredBillboards = [];
+
+        // Load billboards from API
+        async function loadBillboards(filters = {}) {
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            
+            loadingEl.style.display = 'block';
+            errorEl.style.display = 'none';
+            
+            try {
+                const params = new URLSearchParams();
+                if (filters.type) params.append('type', filters.type);
+                if (filters.availability) params.append('availability', filters.availability);
+                if (filters.city) params.append('city', filters.city);
+                
+                const url = `http://localhost:3001/api/billboards${params.toString() ? '?' + params.toString() : ''}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    billboards = data.data;
+                    filteredBillboards = billboards;
+                    displayBillboards();
+                    loadStats();
+                } else {
+                    throw new Error('Failed to load billboards');
+                }
+            } catch (error) {
+                console.error('Error loading billboards:', error);
+                errorEl.textContent = `Error loading billboards: ${error.message}. Make sure the backend server is running on port 3001.`;
+                errorEl.style.display = 'block';
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        // Load statistics
+        async function loadStats() {
+            try {
+                const response = await fetch('http://localhost:3001/api/billboards/stats/summary');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayStats(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Display statistics
+        function displayStats(stats) {
+            const statsEl = document.getElementById('stats');
+            statsEl.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total}</div>
+                    <div class="stat-label">Total Billboards</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.available}</div>
+                    <div class="stat-label">Available Now</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$${stats.priceRange.average.toLocaleString()}</div>
+                    <div class="stat-label">Average Monthly Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${Math.round(stats.trafficRange.average / 1000)}K</div>
+                    <div class="stat-label">Avg Daily Traffic</div>
+                </div>
+            `;
+        }
+
+        // Display billboards
+        function displayBillboards() {
+            const billboardsEl = document.getElementById('billboards');
+            
+            if (filteredBillboards.length === 0) {
+                billboardsEl.innerHTML = '<div class="loading">No billboards found matching your criteria.</div>';
+                return;
+            }
+            
+            billboardsEl.innerHTML = filteredBillboards.map(billboard => `
+                <div class="billboard-card">
+                    <h3>${billboard.name}</h3>
+                    <div class="billboard-detail">
+                        <span class="label">Type:</span>
+                        <span class="value">${billboard.type.charAt(0).toUpperCase() + billboard.type.slice(1)}</span>
+                    </div>
+                    <div class="billboard-detail">
+                        <span class="label">Size:</span>
+                        <span class="value">${billboard.size}</span>
+                    </div>
+                    <div class="billboard-detail">
+                        <span class="label">Location:</span>
+                        <span class="value">${billboard.city}, ${billboard.state}</span>
+                    </div>
+                    <div class="billboard-detail">
+                        <span class="label">Daily Traffic:</span>
+                        <span class="value">${billboard.dailyTraffic.toLocaleString()} vehicles</span>
+                    </div>
+                    <div class="billboard-detail">
+                        <span class="label">Monthly Rate:</span>
+                        <span class="value">$${billboard.monthlyRate.toLocaleString()}</span>
+                    </div>
+                    <div class="billboard-detail">
+                        <span class="label">Availability:</span>
+                        <span class="value availability-${billboard.availability}">
+                            ${billboard.availability.replace('_', ' ').toUpperCase()}
+                        </span>
+                    </div>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                        <p style="font-size: 14px; color: #6b7280;">${billboard.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter functionality
+        function applyFilters() {
+            const filters = {
+                type: document.getElementById('type-filter').value,
+                availability: document.getElementById('availability-filter').value,
+                city: document.getElementById('city-filter').value
+            };
+            
+            loadBillboards(filters);
+        }
+
+        function clearFilters() {
+            document.getElementById('type-filter').value = '';
+            document.getElementById('availability-filter').value = '';
+            document.getElementById('city-filter').value = '';
+            loadBillboards();
+        }
+
+        // Event listeners
+        document.getElementById('apply-filters').addEventListener('click', applyFilters);
+        document.getElementById('clear-filters').addEventListener('click', clearFilters);
+
+        // Load initial data
+        loadBillboards();
+    </script>
+</body>
+</html>
