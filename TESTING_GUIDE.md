@@ -13,8 +13,8 @@
 - **Features**: Interactive map, filtering, modal popups
 
 ### ✅ Demo Pages
-- **HTML Demo**: file:///Users/savvyprogrammers/Desktop/future-work/billboard-map-platform/demo.html
-- **WordPress Demo**: file:///Users/savvyprogrammers/Desktop/future-work/billboard-map-platform/wordpress-demo.html
+- **HTML Demo**: ~/billboard-map-platform/demo.html
+- **WordPress Demo**: ~/billboard-map-platform/wordpress-demo.html
 
 ## 🧪 Testing Features
 
